@@ -2,6 +2,7 @@ use std::env;
 
 mod day1;
 mod day2;
+mod day3;
 
 fn str_to_day(day: &String) -> Option<u32> {
     day[1..].parse::<u32>().ok()
@@ -20,6 +21,7 @@ fn main() {
             match day {
                 1 => day1::run(&args[2]),
                 2 => day2::run(&args[2]),
+                3 => day3::run(&args[2]),
                 _ => println!("Day {} is not implemented yet", day),
             }
         },
