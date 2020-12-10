@@ -2,10 +2,14 @@ use std::fs;
 use std::io;
 use std::io::BufRead;
 
-#[derive(Debug)]
-struct Instruction {
-    name: String,
-    value: i32,
+enum Instruction {
+    Nop(i32),
+    Acc(i32),
+    Jmp(i32),
+}
+
+struct Code {
+    ins: Instruction,
     executed: bool,
 }
 
@@ -13,12 +17,17 @@ pub fn run(filename: &String) {
     let file = fs::File::open(filename).expect("Unable to open a file");
     let reader = io::BufReader::new(file);
 
-    let mut inss: Vec<Instruction> = Vec::new();
+    let mut inss: Vec<Code> = Vec::new();
 
     for line in reader.lines().map(|l| l.unwrap()) {
-        inss.push( Instruction {
-            name: line.split(' ').nth(0).unwrap().to_string(),
-            value: line.split(' ').nth(1).unwrap().parse().unwrap(),
+        let value = line.split(' ').nth(1).unwrap().parse::<i32>().unwrap();
+        inss.push( Code {
+            ins: match line.split(' ').nth(0).unwrap() {
+                "nop" => Instruction::Nop(value),
+                "acc" => Instruction::Acc(value),
+                "jmp" => Instruction::Jmp(value),
+                _     => panic!("Unexpected value"),
+            },
             executed: false,
         });
     }
@@ -30,21 +39,20 @@ pub fn run(filename: &String) {
             break;
         }
         inss[i as usize].executed = true;
-        match inss[i as usize].name.as_ref() {
-            "nop" => i += 1,
-            "acc" => { acc += inss[i as usize].value; i += 1 },
-            "jmp" => i += inss[i as usize].value,
-            _     => panic!("Unexpected instruction"),
+        match inss[i as usize].ins {
+            Instruction::Nop(_) => i += 1,
+            Instruction::Acc(v) => { acc += v; i += 1 },
+            Instruction::Jmp(v) => i += v,
         }
     }
     println!("{}", acc);
 
     // part two
     'outer: for j in 0..inss.len() {
-        inss[j].name = match inss[j].name.as_ref() {
-            "nop" => "jmp".to_string(),
-            "jmp" => "nop".to_string(),
-            _     => continue,
+        inss[j].ins = match inss[j].ins {
+            Instruction::Nop(v) => Instruction::Jmp(v),
+            Instruction::Jmp(v) => Instruction::Nop(v),
+            _                   => continue,
         };
         inss.iter_mut().for_each(|ins| ins.executed = false);
         i = 0;
@@ -57,17 +65,16 @@ pub fn run(filename: &String) {
                 break;
             }
             inss[i as usize].executed = true;
-            match inss[i as usize].name.as_ref() {
-                "nop" => i += 1,
-                "acc" => { acc += inss[i as usize].value; i += 1 },
-                "jmp" => i += inss[i as usize].value,
-                _     => panic!("Unexpected instruction"),
+            match inss[i as usize].ins {
+                Instruction::Nop(_) => i += 1,
+                Instruction::Acc(v) => { acc += v; i += 1 },
+                Instruction::Jmp(v) => i += v,
             }
         }
-        inss[j].name = match inss[j].name.as_ref() {
-            "nop" => "jmp".to_string(),
-            "jmp" => "nop".to_string(),
-            _     => panic!("That shouldn't happen"),
+        inss[j].ins = match inss[j].ins {
+            Instruction::Nop(v) => Instruction::Jmp(v),
+            Instruction::Jmp(v) => Instruction::Nop(v),
+            _                   => panic!("That shouldn't happen"),
         }
     }
     println!("{}", acc);
