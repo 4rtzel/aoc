@@ -1,7 +1,6 @@
 use std::fs;
 use std::io;
 use std::io::BufRead;
-use std::collections::HashMap;
 
 pub fn run(filename: &String) {
     let file = fs::File::open(filename).expect("Unable to open a file");
