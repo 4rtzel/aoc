@@ -2,15 +2,17 @@ use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::collections::HashSet;
+use std::collections::BinaryHeap;
+use std::cmp::Reverse;
 
 fn find_dijkstra(map: &mut Vec<Vec<(u32, u32)>>) {
     map[0][0].1 = 0;
     let mut visited: HashSet<(i32, i32)> = HashSet::new();
-    let mut nodes: Vec<(i32, i32, u32)> = Vec::new();
-    nodes.push((0, 0, 0));
+    let mut nodes: BinaryHeap<Reverse<(u32, i32, i32)>> = BinaryHeap::new();
+    nodes.push(Reverse((0, 0, 0)));
 
     while !nodes.is_empty() {
-        let (x, y, _) = nodes.remove(0);
+        let Reverse((_, x, y)) = nodes.pop().unwrap();
         if visited.contains(&(x, y)) {
             continue;
         }
@@ -21,10 +23,9 @@ fn find_dijkstra(map: &mut Vec<Vec<(u32, u32)>>) {
             let k = (x + i) as usize;
             let l = (y + j) as usize;
             map[k][l].1 = std::cmp::min(map[k][l].1, map[x as usize][y as usize].1 + map[k][l].0);
-            nodes.push((x + i, y + j, map[k][l].1));
+            nodes.push(Reverse((map[k][l].1, x + i, y + j)));
         }
         visited.insert((x, y));
-        nodes.sort_by(|(_, _, l), (_, _, r)| l.cmp(r));
     }
     println!("{}", map.last().unwrap().last().unwrap().1);
 }
