@@ -14,6 +14,7 @@ mod day9;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 
 fn str_to_day(day: &String) -> Option<u32> {
     day[1..].parse::<u32>().ok()
@@ -44,6 +45,7 @@ fn main() {
                 10  => day10::run(reader),
                 11  => day11::run(reader),
                 12  => day12::run(reader),
+                13  => day13::run(reader),
                 _ => println!("Day {} is not implemented yet", day),
             }
         },
