@@ -8,15 +8,6 @@ enum Node {
     Children(Vec<Node>),
 }
 
-impl std::fmt::Debug for Node {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Node::Number(n) => write!(f, "N({})", n),
-            Node::Children(c) => write!(f, "C{:?}", c),
-        }
-    }
-}
-
 impl Node {
     fn get_number(&self) -> Option<u32> {
         match self {
@@ -56,7 +47,7 @@ fn reduce_snailfish_number(root: &mut Node) {
 }
 
 fn explode_snailfish_number(node: &mut Node) -> bool {
-    let mut state = ExplodeState::new(false, false, false, 0, 0);
+    let mut state = ExplodeState { pair_found: false, left_added: false, right_added: false, left_value: 0, right_value: 0 };
     explode_snailfish_number_impl(node, 0, &mut state);
     state.pair_found
 }
@@ -67,18 +58,6 @@ struct ExplodeState {
     right_added: bool,
     left_value: u32,
     right_value: u32,
-}
-
-impl ExplodeState {
-    fn new(pair_found: bool, left_added: bool, right_added: bool, left_value: u32, right_value: u32) -> Self {
-        Self {
-            pair_found: pair_found,
-            left_added: left_added,
-            right_added: right_added,
-            left_value: left_value,
-            right_value: right_value,
-        }
-    }
 }
 
 fn explode_snailfish_number_impl(node: &mut Node, mut number_of_pairs: u32, state: &mut ExplodeState) -> bool {
